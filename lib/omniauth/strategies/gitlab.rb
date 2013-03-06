@@ -53,9 +53,12 @@ module OmniAuth
             req.headers['Content-Type'] = 'application/json'
             req.params = { :email => request['email'], :password => request['password'] }
           end
-          resp.success? ? MultiJson.load(resp.body) : nil
+          resp.success? ? MultiJson.decode(resp.body) : nil
         end 
       end
     end
   end
 end
+
+
+OmniAuth.config.add_camelization 'gitlab', 'GitLab'
