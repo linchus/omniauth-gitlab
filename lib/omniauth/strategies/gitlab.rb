@@ -33,14 +33,12 @@ module OmniAuth
         {
           :name => identity['name'],
           :email => identity['email'],
-          :nickname => identity['username'],
+          :nickname => identity['username']
         } 
       end
       
       credentials do
-        {
-          :token => identity['private_token']
-        }
+        { :token => identity['private_token'] }
       end
       
       extra do 
