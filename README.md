@@ -20,8 +20,10 @@ Or install it yourself as:
 ## Basic Usage
 
     use OmniAuth::Builder do
-      provider :gitlab, :site => 'https://your.git.lab.com/'
+      provider :gitlab, :site => 'https://your.git.lab.com/', :v => 'v3'
     end
+
+Default value for :v parameter is 'v3'.
 
 ## Contributing
 

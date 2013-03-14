@@ -5,6 +5,7 @@ module OmniAuth
 
       option :fields, [:email]
       option :site, nil
+      option :v, 'v3'
       option :uid_field, :email
       option :on_login, nil
       option :on_registration, nil
@@ -49,7 +50,7 @@ module OmniAuth
         @identity ||= begin
           conn = Faraday.new(:url => options[:site])
           resp = conn.post do |req|
-            req.url '/api/v3/session'
+            req.url "/api/#{options[:v]}/session"
             req.headers['Content-Type'] = 'application/json'
             req.params = { :email => request['email'], :password => request['password'] }
           end
