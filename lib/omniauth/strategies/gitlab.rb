@@ -1,3 +1,6 @@
+require 'faraday'
+require 'multi_json'
+
 module OmniAuth
   module Strategies
     class GitLab
