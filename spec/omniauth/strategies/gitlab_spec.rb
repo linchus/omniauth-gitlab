@@ -59,6 +59,7 @@ describe OmniAuth::Strategies::GitLab do
       it 'should populate the info hash' do
         auth_hash.info.email.should eq 'john@example.com'
         auth_hash.info.nickname.should eq 'john_smith'
+        auth_hash.info.name.should eq 'John Smith'
       end
 
     end

@@ -36,7 +36,7 @@ module OmniAuth
       uid{ identity['id'].to_s }
       info do
         {
-          :login => identity['login'],
+          :name => identity['name'],
           :email => identity['email'],
           :nickname => identity['username']
         }
