@@ -21,7 +21,7 @@ module OmniAuth
         else
           form = OmniAuth::Form.new(:title =>  (options[:title] || "Gitlab Verification"), :url => callback_path)
 
-          form.text_field 'Email', 'email'
+          form.text_field 'Name', 'name'
           form.password_field 'Password', 'password'
           form.button "Sign In"
           form.to_response
@@ -56,7 +56,7 @@ module OmniAuth
           resp = conn.post do |req|
             req.url "/api/#{options[:v]}/session"
             req.headers['Content-Type'] = 'application/json'
-            req.params = { :email => request['email'], :password => request['password'] }
+            req.params = { :name => request['name'], :password => request['password'] }
           end
           resp.success? ? MultiJson.decode(resp.body) : nil
         end
