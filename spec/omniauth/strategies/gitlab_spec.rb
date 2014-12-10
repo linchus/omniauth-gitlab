@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe OmniAuth::Strategies::GitLab do
   attr_accessor :app
-  
+
   let(:auth_hash){ last_response.headers['env']['omniauth.auth'] }
-  
+
   def set_app!(gitlab_options = {})
     old_app = self.app
     self.app = Rack::Builder.app do
@@ -31,10 +31,10 @@ describe OmniAuth::Strategies::GitLab do
   end
 
   describe '#callback_phase' do
-    
+
     context 'with valid credentials' do
       before do
-       stub_request(:post, "http://some.site.com/api/v3/session?email=john@test.com&password=awesome").
+       stub_request(:post, "http://some.site.com/api/v3/session?login=john@test.com&password=awesome").
          with(:headers => {'Content-Type'=>'application/json'}).
          to_return(:status => 200, :body => '{
                                 "id": 1,
@@ -45,9 +45,9 @@ describe OmniAuth::Strategies::GitLab do
                                 "created_at": "2012-05-23T08:00:58Z",
                                 "blocked": true
                             }')
-        post '/auth/gitlab/callback', :email => 'john@test.com', :password => 'awesome'
+        post '/auth/gitlab/callback', :login => 'john@test.com', :password => 'awesome'
       end
-      
+
       it 'should populate the auth hash' do
         auth_hash.should be_kind_of(Hash)
       end
@@ -57,27 +57,26 @@ describe OmniAuth::Strategies::GitLab do
       end
 
       it 'should populate the info hash' do
-        auth_hash.info.name.should eq 'John Smith'
         auth_hash.info.email.should eq 'john@example.com'
-        auth_hash.info.nickname.should eq 'john_smith' 
+        auth_hash.info.nickname.should eq 'john_smith'
       end
-            
+
     end
-    
+
     context 'with invalid credentials' do
       before do
-       stub_request(:post, "http://some.site.com/api/v3/session?email=john@test.com&password=incorrect").
+       stub_request(:post, "http://some.site.com/api/v3/session?login=john@test.com&password=incorrect").
          with(:headers => {'Content-Type'=>'application/json'}).
          to_return(:status => 401, :body => '{"message":"401Unauthorized"}')
-        post '/auth/gitlab/callback', :email => 'john@test.com', :password => 'incorrect'
+        post '/auth/gitlab/callback', :login => 'john@test.com', :password => 'incorrect'
       end
 
       it 'should fail with :invalid_credentials' do
         last_response.should be_redirect
         last_response.headers['Location'].should eq "/auth/failure?message=invalid_credentials&strategy=gitlab"
-      end      
+      end
 
     end
   end
-  
+
 end
