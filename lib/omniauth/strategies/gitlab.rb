@@ -1,5 +1,6 @@
 require 'faraday'
 require 'multi_json'
+require 'omniauth'
 
 module OmniAuth
   module Strategies
@@ -19,8 +20,8 @@ module OmniAuth
           options[:on_login].call(self.env)
         else
           form = OmniAuth::Form.new(:title =>  (options[:title] || "Gitlab Verification"), :url => callback_path)
-          
-          form.text_field 'Email', 'email'
+
+          form.text_field 'Login', 'login'
           form.password_field 'Password', 'password'
           form.button "Sign In"
           form.to_response
@@ -31,34 +32,37 @@ module OmniAuth
         return fail!(:invalid_credentials) unless identity
         super
       end
-      
+
       uid{ identity['id'].to_s }
       info do
         {
           :name => identity['name'],
           :email => identity['email'],
           :nickname => identity['username']
-        } 
+        }
       end
-      
+
       credentials do
         { :token => identity['private_token'] }
       end
-      
-      extra do 
+
+      extra do
         { :raw_info => identity }
       end
-      
+
       def identity
         @identity ||= begin
           conn = Faraday.new(:url => options[:site])
           resp = conn.post do |req|
             req.url "/api/#{options[:v]}/session"
             req.headers['Content-Type'] = 'application/json'
-            req.params = { :email => request['email'], :password => request['password'] }
+            req.params = {
+              :login => request['login'],
+              :password => request['password']
+            }
           end
           resp.success? ? MultiJson.decode(resp.body) : nil
-        end 
+        end
       end
     end
   end
