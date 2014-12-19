@@ -21,7 +21,7 @@ module OmniAuth
         else
           form = OmniAuth::Form.new(:title =>  (options[:title] || "Gitlab Verification"), :url => callback_path)
 
-          form.text_field 'Login', 'login'
+          form.text_field 'Username or e-mail', 'login'
           form.password_field 'Password', 'password'
           form.button "Sign In"
           form.to_response
