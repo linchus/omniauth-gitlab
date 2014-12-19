@@ -32,9 +32,9 @@ describe OmniAuth::Strategies::GitLab do
 
   describe '#callback_phase' do
 
-    context 'with valid credentials' do
+    context 'with valid credentials using email' do
       before do
-       stub_request(:post, "http://some.site.com/api/v3/session?login=john@test.com&password=awesome").
+       stub_request(:post, "http://some.site.com/api/v3/session?email=john@test.com&password=awesome").
          with(:headers => {'Content-Type'=>'application/json'}).
          to_return(:status => 200, :body => '{
                                 "id": 1,
@@ -61,12 +61,42 @@ describe OmniAuth::Strategies::GitLab do
         auth_hash.info.nickname.should eq 'john_smith'
         auth_hash.info.name.should eq 'John Smith'
       end
+    end
 
+    context 'with valid credentials using login' do
+      before do
+       stub_request(:post, "http://some.site.com/api/v3/session?login=john_smith&password=awesome").
+         with(:headers => {'Content-Type'=>'application/json'}).
+         to_return(:status => 200, :body => '{
+                                "id": 1,
+                                "username": "john_smith",
+                                "email": "john@example.com",
+                                "name": "John Smith",
+                                "private_token": "dd34asd13as",
+                                "created_at": "2012-05-23T08:00:58Z",
+                                "blocked": true
+                            }')
+        post '/auth/gitlab/callback', :login => 'john_smith', :password => 'awesome'
+      end
+
+      it 'should populate the auth hash' do
+        auth_hash.should be_kind_of(Hash)
+      end
+
+      it 'should populate the uid' do
+        auth_hash['uid'].should eq '1'
+      end
+
+      it 'should populate the info hash' do
+        auth_hash.info.email.should eq 'john@example.com'
+        auth_hash.info.nickname.should eq 'john_smith'
+        auth_hash.info.name.should eq 'John Smith'
+      end
     end
 
     context 'with invalid credentials' do
       before do
-       stub_request(:post, "http://some.site.com/api/v3/session?login=john@test.com&password=incorrect").
+       stub_request(:post, "http://some.site.com/api/v3/session?email=john@test.com&password=incorrect").
          with(:headers => {'Content-Type'=>'application/json'}).
          to_return(:status => 401, :body => '{"message":"401Unauthorized"}')
         post '/auth/gitlab/callback', :login => 'john@test.com', :password => 'incorrect'

@@ -53,16 +53,22 @@ module OmniAuth
       def identity
         @identity ||= begin
           conn = Faraday.new(:url => options[:site])
+          key = is_email?(request['login']) ? :email : :login
           resp = conn.post do |req|
             req.url "/api/#{options[:v]}/session"
             req.headers['Content-Type'] = 'application/json'
             req.params = {
-              :login => request['login'],
+              key  => request['login'],
               :password => request['password']
             }
           end
           resp.success? ? MultiJson.decode(resp.body) : nil
         end
+      end
+
+      # check if login string looks like email
+      def is_email?(str)
+        str.match(/[a-zA-Z0-9._%]@(?:[a-zA-Z0-9]+\.)[a-zA-Z]{2,4}/)
       end
     end
   end
