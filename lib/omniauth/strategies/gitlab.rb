@@ -1,74 +1,32 @@
-require 'faraday'
-require 'multi_json'
-require 'omniauth'
+
+require 'omniauth-oauth2'
 
 module OmniAuth
   module Strategies
-    class GitLab
-      include OmniAuth::Strategy
+    class GitLab < OmniAuth::Strategies::OAuth2
 
-      option :fields, [:email]
-      option :site, nil
-      option :v, 'v3'
-      option :uid_field, :email
-      option :on_login, nil
-      option :on_registration, nil
-      option :on_failed_registration, nil
+      option :client_options, {
+          site: 'https://gitlab.com',
+          authorize_url: '/oauth/authorize',
+          token_url: '/oauth/token'
+      }
 
-      def request_phase
-        if options[:on_login]
-          options[:on_login].call(self.env)
-        else
-          form = OmniAuth::Form.new(:title =>  (options[:title] || "Gitlab Verification"), :url => callback_path)
+      uid { raw_info['id'].to_s }
 
-          form.text_field 'Username or e-mail', 'login'
-          form.password_field 'Password', 'password'
-          form.button "Sign In"
-          form.to_response
-        end
-      end
-
-      def callback_phase
-        return fail!(:invalid_credentials) unless identity
-        super
-      end
-
-      uid{ identity['id'].to_s }
       info do
         {
-          :name => identity['name'],
-          :email => identity['email'],
-          :nickname => identity['username']
+            name:     raw_info['name'],
+            username: raw_info['username'],
+            email:    raw_info['email']
         }
       end
 
-      credentials do
-        { :token => identity['private_token'] }
-      end
-
       extra do
-        { :raw_info => identity }
+        { raw_info: raw_info }
       end
 
-      def identity
-        @identity ||= begin
-          conn = Faraday.new(:url => options[:site])
-          key = is_email?(request['login']) ? :email : :login
-          resp = conn.post do |req|
-            req.url "/api/#{options[:v]}/session"
-            req.headers['Content-Type'] = 'application/json'
-            req.params = {
-              key  => request['login'],
-              :password => request['password']
-            }
-          end
-          resp.success? ? MultiJson.decode(resp.body) : nil
-        end
-      end
-
-      # check if login string looks like email
-      def is_email?(str)
-        str.match(/[a-zA-Z0-9._%]@(?:[a-zA-Z0-9]+\.)[a-zA-Z]{2,4}/)
+      def raw_info
+        @raw_info ||= access_token.get('/api/v3/user').parsed
       end
     end
   end

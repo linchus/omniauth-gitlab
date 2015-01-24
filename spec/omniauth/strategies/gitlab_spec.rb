@@ -1,113 +1,54 @@
 require 'spec_helper'
 
 describe OmniAuth::Strategies::GitLab do
-  attr_accessor :app
 
-  let(:auth_hash){ last_response.headers['env']['omniauth.auth'] }
+  let(:access_token) { double('AccessToken') }
+  let(:parsed_response) { double('ParsedResponse') }
+  let(:response) { double('Response', parsed: parsed_response) }
 
-  def set_app!(gitlab_options = {})
-    old_app = self.app
-    self.app = Rack::Builder.app do
-      use Rack::Session::Cookie
-      use OmniAuth::Strategies::GitLab, {:site => 'http://some.site.com/'  }.merge(gitlab_options)
-      run lambda{|env| [404, {'env' => env}, ["HELLO!"]]}
-    end
-    if block_given?
-      yield
-      self.app = old_app
-    end
-    self.app
+  let(:enterprise_site)           { 'https://some.other.site.com/api/v3' }
+  let(:enterprise_authorize_url)  { '/oauth/authorize' }
+  let(:enterprise_token_url)      { '/oauth/access_token' }
+
+  let(:gitlab_service) { OmniAuth::Strategies::GitLab.new({}) }
+  let(:enterprise) do
+    OmniAuth::Strategies::GitLab.new('GITLAB_KEY', 'GITLAB_SECRET',
+                                         client_options: {
+                                             site: enterprise_site,
+                                             authorize_url: enterprise_authorize_url,
+                                             token_url: enterprise_token_url
+                                         }
+    )
   end
 
-  before(:all) do
-    set_app!
+  subject { gitlab_service }
+
+  before(:each) do
+    allow(subject).to receive(:access_token).and_return(access_token)
   end
 
-  describe '#request_phase' do
-    it 'should display a form' do
-      get '/auth/gitlab'
-      last_response.body.should be_include("<form")
-    end
-  end
+  describe 'client options' do
+    context 'with defaults' do
+      subject { gitlab_service.options.client_options }
 
-  describe '#callback_phase' do
-
-    context 'with valid credentials using email' do
-      before do
-       stub_request(:post, "http://some.site.com/api/v3/session?email=john@test.com&password=awesome").
-         with(:headers => {'Content-Type'=>'application/json'}).
-         to_return(:status => 200, :body => '{
-                                "id": 1,
-                                "username": "john_smith",
-                                "email": "john@example.com",
-                                "name": "John Smith",
-                                "private_token": "dd34asd13as",
-                                "created_at": "2012-05-23T08:00:58Z",
-                                "blocked": true
-                            }')
-        post '/auth/gitlab/callback', :login => 'john@test.com', :password => 'awesome'
-      end
-
-      it 'should populate the auth hash' do
-        auth_hash.should be_kind_of(Hash)
-      end
-
-      it 'should populate the uid' do
-        auth_hash['uid'].should eq '1'
-      end
-
-      it 'should populate the info hash' do
-        auth_hash.info.email.should eq 'john@example.com'
-        auth_hash.info.nickname.should eq 'john_smith'
-        auth_hash.info.name.should eq 'John Smith'
-      end
+      its(:site) { is_expected.to eq 'https://gitlab.com' }
+      its(:authorize_url) { is_expected.to eq '/oauth/authorize' }
+      its(:token_url) { is_expected.to eq '/oauth/token' }
     end
 
-    context 'with valid credentials using login' do
-      before do
-       stub_request(:post, "http://some.site.com/api/v3/session?login=john_smith&password=awesome").
-         with(:headers => {'Content-Type'=>'application/json'}).
-         to_return(:status => 200, :body => '{
-                                "id": 1,
-                                "username": "john_smith",
-                                "email": "john@example.com",
-                                "name": "John Smith",
-                                "private_token": "dd34asd13as",
-                                "created_at": "2012-05-23T08:00:58Z",
-                                "blocked": true
-                            }')
-        post '/auth/gitlab/callback', :login => 'john_smith', :password => 'awesome'
-      end
+    context 'with override' do
+      subject { enterprise.options.client_options }
 
-      it 'should populate the auth hash' do
-        auth_hash.should be_kind_of(Hash)
-      end
-
-      it 'should populate the uid' do
-        auth_hash['uid'].should eq '1'
-      end
-
-      it 'should populate the info hash' do
-        auth_hash.info.email.should eq 'john@example.com'
-        auth_hash.info.nickname.should eq 'john_smith'
-        auth_hash.info.name.should eq 'John Smith'
-      end
-    end
-
-    context 'with invalid credentials' do
-      before do
-       stub_request(:post, "http://some.site.com/api/v3/session?email=john@test.com&password=incorrect").
-         with(:headers => {'Content-Type'=>'application/json'}).
-         to_return(:status => 401, :body => '{"message":"401Unauthorized"}')
-        post '/auth/gitlab/callback', :login => 'john@test.com', :password => 'incorrect'
-      end
-
-      it 'should fail with :invalid_credentials' do
-        last_response.should be_redirect
-        last_response.headers['Location'].should eq "/auth/failure?message=invalid_credentials&strategy=gitlab"
-      end
-
+      its(:site) { is_expected.to eq enterprise_site }
+      its(:authorize_url) { is_expected.to eq enterprise_authorize_url }
+      its(:token_url) { is_expected.to eq enterprise_token_url }
     end
   end
 
+  describe '#raw_info' do
+    it 'sent request to current user endpoint' do
+      expect(access_token).to receive(:get).with('/api/v3/user').and_return(response)
+      expect(subject.raw_info).to eq(parsed_response)
+    end
+  end
 end

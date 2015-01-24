@@ -1,8 +1,11 @@
 # Omniauth::Gitlab
 
-This is the strategy for authenticating to your GitLab service. To
-use it, you'll need to set gitlab url.
+This is the OAuth2 strategy for authenticating to your GitLab service.
 
+## Requirements
+
+Gitlab 7.7.0+
+ 
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -20,10 +23,19 @@ Or install it yourself as:
 ## Basic Usage
 
     use OmniAuth::Builder do
-      provider :gitlab, :site => 'https://your.git.lab.com/', :v => 'v3'
+      provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET']
     end
 
-Default value for :v parameter is 'v3'.
+## Standalone Usage
+
+    use OmniAuth::Builder do
+      provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET'], 
+                                client_options: {
+                                     site: 'https://gitlab.YOURDOMAIN.com',
+                                     authorize_url: '/oauth/authorize',
+                                     token_url: '/oauth/token'
+                                 }      
+    end
 
 ## Contributing
 
