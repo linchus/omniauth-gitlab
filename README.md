@@ -31,9 +31,9 @@ Or install it yourself as:
     use OmniAuth::Builder do
       provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET'], 
                                 client_options: {
-                                     site: enterprise_site,
-                                     authorize_url: enterprise_authorize_url,
-                                     token_url: enterprise_token_url
+                                     site: 'https://gitlab.YOURDOMAIN.com',
+                                     authorize_url: '/oauth/authorize',
+                                     token_url: '/oauth/token'
                                  }      
     end
 
