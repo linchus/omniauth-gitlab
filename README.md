@@ -1,5 +1,7 @@
 # Omniauth::Gitlab
 
+[![Join the chat at https://gitter.im/linchus/omniauth-gitlab](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/linchus/omniauth-gitlab?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This is the OAuth2 strategy for authenticating to your GitLab service.
 
 ## Requirements
