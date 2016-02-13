@@ -17,7 +17,8 @@ describe OmniAuth::Strategies::GitLab do
                                              site: enterprise_site,
                                              authorize_url: enterprise_authorize_url,
                                              token_url: enterprise_token_url
-                                         }
+                                         },
+                                         redirect_url: 'http://localhost:9292/callback_url'
     )
   end
 
@@ -42,6 +43,18 @@ describe OmniAuth::Strategies::GitLab do
       its(:site) { is_expected.to eq enterprise_site }
       its(:authorize_url) { is_expected.to eq enterprise_authorize_url }
       its(:token_url) { is_expected.to eq enterprise_token_url }
+    end
+  end
+
+  describe 'redirect_url' do
+    context 'with defaults' do
+      subject { gitlab_service.options }
+      its(:redirect_url) { is_expected.to be_nil }
+    end
+
+    context 'with customs' do
+      subject { enterprise.options }
+      its(:redirect_url) { is_expected.to eq 'http://localhost:9292/callback_url' }
     end
   end
 
