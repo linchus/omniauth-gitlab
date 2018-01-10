@@ -4,12 +4,7 @@ require 'omniauth-oauth2'
 module OmniAuth
   module Strategies
     class GitLab < OmniAuth::Strategies::OAuth2
-
-      option :client_options, {
-          site: 'https://gitlab.com',
-          authorize_url: '/oauth/authorize',
-          token_url: '/oauth/token'
-      }
+      option :client_options, site: 'https://gitlab.com/api/v4'
 
       option :redirect_url
 
@@ -17,10 +12,10 @@ module OmniAuth
 
       info do
         {
-            name:     raw_info['name'],
-            username: raw_info['username'],
-            email:    raw_info['email'],
-            image:    raw_info['avatar_url']
+          name: raw_info['name'],
+          username: raw_info['username'],
+          email: raw_info['email'],
+          image: raw_info['avatar_url']
         }
       end
 
@@ -29,7 +24,7 @@ module OmniAuth
       end
 
       def raw_info
-        @raw_info ||= access_token.get('/api/v3/user').parsed
+        @raw_info ||= access_token.get('user').parsed
       end
 
       private
@@ -40,6 +35,5 @@ module OmniAuth
     end
   end
 end
-
 
 OmniAuth.config.add_camelization 'gitlab', 'GitLab'
