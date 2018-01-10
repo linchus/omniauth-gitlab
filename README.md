@@ -31,12 +31,35 @@ Or install it yourself as:
 ## Standalone Usage
 
     use OmniAuth::Builder do
-      provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET'], 
-                                client_options: {
-                                     site: 'https://gitlab.YOURDOMAIN.com',
-                                     authorize_url: '/oauth/authorize',
-                                     token_url: '/oauth/token'
-                                 }      
+      provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET'],
+        {
+           client_options: {
+             site: 'https://gitlab.YOURDOMAIN.com/api/v4'
+           }
+        }
+    end
+
+## Custom scopes
+
+    use OmniAuth::Builder do
+      provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET'], scope: 'read_user openid'
+    end
+
+## Old API version
+
+API V3 will be unsupported from GitLab 9.5 and will be removed in GitLab 9.5 or later.
+
+[https://gitlab.com/help/api/v3_to_v4.md](https://gitlab.com/help/api/v3_to_v4.md)
+
+If you use GitLab 9.0 and below you could configure V3 API:
+
+    use OmniAuth::Builder do
+      provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET'],
+        {
+           client_options: {
+             site: 'https://gitlab.YOURDOMAIN.com/api/v3'
+           }
+        }
     end
 
 ## Contributing
