@@ -41,9 +41,13 @@ Or install it yourself as:
 
 ## Custom scopes
 
+By default, the `api` scope is requested and must be allowed in GitLab's application configuration. To use different scopes:
+
     use OmniAuth::Builder do
       provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET'], scope: 'read_user openid'
     end
+
+Requesting a scope that is not configured will result the error "The requested scope is invalid, unknown, or malformed.".
 
 ## Old API version
 
