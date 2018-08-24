@@ -24,10 +24,14 @@ module OmniAuth
       end
 
       def raw_info
-        @raw_info ||= access_token.get('user').parsed
+        @raw_info ||= access_token.get(user_endpoint_url).parsed
       end
 
       private
+
+      def user_endpoint_url
+        options.client_options.site.match(%r{v(\d+)/?$}) ? 'user' : '/api/v3/user'
+      end
 
       def callback_url
         options.redirect_url || (full_host + script_name + callback_path)
