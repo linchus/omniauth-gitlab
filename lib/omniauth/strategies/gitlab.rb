@@ -4,7 +4,9 @@ require 'omniauth-oauth2'
 module OmniAuth
   module Strategies
     class GitLab < OmniAuth::Strategies::OAuth2
-      option :client_options, site: 'https://gitlab.com/api/v4'
+      option :client_options, site: 'https://gitlab.com/api/v4',
+                              authorize_url: '/oauth/authorize',
+                              token_url: '/oauth/token'
 
       option :redirect_url
 
