@@ -4,7 +4,7 @@ require 'omniauth-oauth2'
 module OmniAuth
   module Strategies
     class GitLab < OmniAuth::Strategies::OAuth2
-      option :client_options, site: 'https://gitlab.com/api/v4'
+      option :client_options, site: 'https://gitlab.com'
 
       option :redirect_url
 
@@ -24,7 +24,7 @@ module OmniAuth
       end
 
       def raw_info
-        @raw_info ||= access_token.get('user').parsed
+        @raw_info ||= access_token.get('api/v4/user').parsed
       end
 
       private

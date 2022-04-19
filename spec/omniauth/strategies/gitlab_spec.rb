@@ -27,7 +27,7 @@ describe OmniAuth::Strategies::GitLab do
     context 'with defaults' do
       subject { gitlab_service.options.client_options }
 
-      its(:site) { is_expected.to eq 'https://gitlab.com/api/v4' }
+      its(:site) { is_expected.to eq 'https://gitlab.com' }
     end
 
     context 'with override' do
@@ -51,7 +51,7 @@ describe OmniAuth::Strategies::GitLab do
 
   describe '#raw_info' do
     it 'sent request to current user endpoint' do
-      expect(access_token).to receive(:get).with('user').and_return(response)
+      expect(access_token).to receive(:get).with('api/v4/user').and_return(response)
       expect(subject.raw_info).to eq(parsed_response)
     end
   end
