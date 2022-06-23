@@ -5,7 +5,7 @@ describe OmniAuth::Strategies::GitLab do
   let(:parsed_response) { double('ParsedResponse') }
   let(:response) { double('Response', parsed: parsed_response) }
 
-  let(:enterprise_site) { 'https://some.other.site.com/api/v3' }
+  let(:enterprise_site) { 'https://some.other.site.com' }
 
   let(:gitlab_service) { OmniAuth::Strategies::GitLab.new({}) }
   let(:enterprise) do

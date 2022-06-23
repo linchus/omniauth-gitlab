@@ -34,7 +34,7 @@ Or install it yourself as:
       provider :gitlab, ENV['GITLAB_KEY'], ENV['GITLAB_SECRET'],
         {
            client_options: {
-             site: 'https://gitlab.YOURDOMAIN.com/api/v4'
+             site: 'https://gitlab.YOURDOMAIN.com'
            }
         }
     end
