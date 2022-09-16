@@ -27,10 +27,8 @@ module OmniAuth
         @raw_info ||= access_token.get('api/v4/user').parsed
       end
 
-      private
-
       def callback_url
-        options.redirect_url || (full_host + script_name + callback_path)
+        options.redirect_url || (full_host + callback_path)
       end
     end
   end
